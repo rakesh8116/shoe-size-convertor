@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useTheme } from '../context/ThemeContext';
 
 const ChartScreen = () => {
   const { theme } = useTheme();
+  const [selectedGender, setSelectedGender] = useState('men');
 
   const renderSizeChart = (gender) => {
     const data = conversionData[gender];
@@ -79,10 +80,61 @@ const ChartScreen = () => {
 
       <View style={[styles.content, { backgroundColor: theme.colors.background }]}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Size Charts */}
-          {renderSizeChart('men')}
-          {renderSizeChart('women')}
-          {renderSizeChart('kids')}
+          {/* Gender Selection Buttons */}
+          <View style={styles.genderContainer}>
+            {['men', 'women', 'kids'].map((g) => {
+              const getActiveColor = () => {
+                if (g === 'women') return '#ec4899'; // Pink
+                if (g === 'kids') return '#f59e0b'; // Yellow/Orange
+                return theme.colors.primary; // Blue for men
+              };
+
+              const getIconColor = () => {
+                if (selectedGender === g) return '#fff';
+                if (g === 'women') return '#ec4899';
+                if (g === 'kids') return '#f59e0b';
+                return theme.colors.primary;
+              };
+
+              const getTextColor = () => {
+                if (selectedGender === g) return '#fff';
+                if (g === 'women') return '#ec4899';
+                if (g === 'kids') return '#f59e0b';
+                return theme.colors.primary;
+              };
+
+              return (
+                <TouchableOpacity
+                  key={g}
+                  style={[
+                    styles.genderButton,
+                    { backgroundColor: theme.colors.inputBackground },
+                    selectedGender === g && { backgroundColor: getActiveColor() },
+                  ]}
+                  onPress={() => setSelectedGender(g)}
+                >
+                  <Ionicons
+                    name={
+                      g === 'men' ? 'man' : g === 'women' ? 'woman' : 'happy'
+                    }
+                    size={24}
+                    color={getIconColor()}
+                  />
+                  <Text
+                    style={[
+                      styles.genderText,
+                      { color: getTextColor() },
+                    ]}
+                  >
+                    {g.charAt(0).toUpperCase() + g.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Size Chart for Selected Gender */}
+          {renderSizeChart(selectedGender)}
 
           {/* Width Guide */}
           <View style={styles.guideSection}>
@@ -371,6 +423,25 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 18,
+  },
+  genderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  genderButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 4,
+  },
+  genderText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
