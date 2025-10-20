@@ -98,3 +98,95 @@ export const widthGuide = {
   wide: 'Look for 2E width (women) or W/2E width (men)',
   'extra-wide': 'Seek 4E width options for best comfort'
 };
+
+// Kids' shoe size to age recommendations (approximate)
+export const kidsAgeGuide = {
+  US: {
+    1: '6-12 months',
+    2: '9-15 months',
+    3: '12-18 months',
+    4: '15-24 months',
+    5: '2-2.5 years',
+    6: '2.5-3 years',
+    7: '3-4 years',
+    8: '4-5 years',
+    9: '5-6 years',
+    10: '6-7 years',
+    11: '7-8 years',
+    12: '8-9 years',
+    13: '9-10 years'
+  },
+  UK: {
+    0.5: '6-12 months',
+    1.5: '9-15 months',
+    2.5: '12-18 months',
+    3.5: '15-24 months',
+    4.5: '2-2.5 years',
+    5.5: '2.5-3 years',
+    6: '3-4 years',
+    7: '4-5 years',
+    8: '5-6 years',
+    9: '6-7 years',
+    10: '7-8 years',
+    11: '8-9 years',
+    12: '9-10 years'
+  },
+  EU: {
+    16: '6-12 months',
+    17: '9-15 months',
+    19: '12-18 months',
+    20: '15-24 months',
+    21: '2-2.5 years',
+    22: '2.5-3 years',
+    23: '3-4 years',
+    25: '4-5 years',
+    26: '5-6 years',
+    27: '6-7 years',
+    28: '7-8 years',
+    30: '8-9 years',
+    31: '9-10 years'
+  },
+  CM: {
+    8.3: '6-12 months',
+    9.2: '9-15 months',
+    10: '12-18 months',
+    10.8: '15-24 months',
+    11.7: '2-2.5 years',
+    12.5: '2.5-3 years',
+    13.3: '3-4 years',
+    14.2: '4-5 years',
+    15: '5-6 years',
+    15.8: '6-7 years',
+    16.7: '7-8 years',
+    17.5: '8-9 years',
+    18.3: '9-10 years'
+  },
+  JP: {
+    8.3: '6-12 months',
+    9.2: '9-15 months',
+    10: '12-18 months',
+    10.8: '15-24 months',
+    11.7: '2-2.5 years',
+    12.5: '2.5-3 years',
+    13.3: '3-4 years',
+    14.2: '4-5 years',
+    15: '5-6 years',
+    15.8: '6-7 years',
+    16.7: '7-8 years',
+    17.5: '8-9 years',
+    18.3: '9-10 years'
+  }
+};
+
+// Helper function to get age recommendation for kids' sizes
+export const getKidsAgeRecommendation = (size, system) => {
+  if (!kidsAgeGuide[system]) return null;
+
+  // Find exact match or closest size
+  const availableSizes = Object.keys(kidsAgeGuide[system]).map(Number);
+  const closestSize = availableSizes.reduce((prev, curr) =>
+    Math.abs(curr - size) < Math.abs(prev - size) ? curr : prev
+  );
+
+  return kidsAgeGuide[system][closestSize];
+};

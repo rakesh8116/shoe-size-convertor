@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
-import { getAllConversions, fitRecommendations } from '../data/conversionData';
+import { getAllConversions, fitRecommendations, getKidsAgeRecommendation } from '../data/conversionData';
 import { useTheme } from '../context/ThemeContext';
 import OnboardingModal from '../components/OnboardingModal';
 import HistoryModal from '../components/HistoryModal';
@@ -394,6 +394,19 @@ const ConverterScreen = () => {
                   </Text>
                 </View>
               </View>
+
+              {/* Age Recommendation for Kids */}
+              {gender === 'kids' && (
+                <View style={styles.ageRecommendation}>
+                  <Ionicons name="person-outline" size={18} color={theme.colors.primary} />
+                  <View style={styles.ageTextContainer}>
+                    <Text style={[styles.ageLabel, { color: theme.colors.textTertiary }]}>Typical Age:</Text>
+                    <Text style={[styles.ageRange, { color: theme.colors.text }]}>
+                      {getKidsAgeRecommendation(parseFloat(inputSize), fromCountry) || 'Size varies by child'}
+                    </Text>
+                  </View>
+                </View>
+              )}
             </Animated.View>
           )}
 
@@ -771,6 +784,29 @@ const styles = StyleSheet.create({
   },
   conversionSize: {
     fontSize: 42,
+    fontWeight: '700',
+  },
+  ageRecommendation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  ageTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  ageLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 6,
+  },
+  ageRange: {
+    fontSize: 14,
     fontWeight: '700',
   },
   swapButton: {
