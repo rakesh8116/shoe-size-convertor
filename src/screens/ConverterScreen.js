@@ -18,11 +18,20 @@ import { useTheme } from '../context/ThemeContext';
 const ConverterScreen = () => {
   const { theme } = useTheme();
   const [gender, setGender] = useState('men');
-  const [sizeSystem, setSizeSystem] = useState('US');
+  const [fromCountry, setFromCountry] = useState('US');
+  const [toCountry, setToCountry] = useState('UK');
   const [inputSize, setInputSize] = useState('');
-  const [conversions, setConversions] = useState(null);
+  const [convertedSize, setConvertedSize] = useState(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [favorites, setFavorites] = useState([]);
+
+  const countries = [
+    { code: 'US', name: 'United States', flag: '🇺🇸' },
+    { code: 'UK', name: 'United Kingdom', flag: '🇬🇧' },
+    { code: 'EU', name: 'Europe', flag: '🇪🇺' },
+    { code: 'JP', name: 'Japan', flag: '🇯🇵' },
+    { code: 'CM', name: 'Centimeters', flag: '📏' },
+  ];
   
   const scaleAnim = new Animated.Value(1);
 
@@ -42,14 +51,15 @@ const ConverterScreen = () => {
   };
 
   const saveFavorite = async () => {
-    if (!inputSize || !conversions) return;
+    if (!inputSize || !convertedSize) return;
 
     const favorite = {
       id: Date.now().toString(),
       gender,
-      system: sizeSystem,
-      size: inputSize,
-      conversions,
+      fromCountry,
+      toCountry,
+      inputSize,
+      convertedSize,
     };
 
     const newFavorites = [...favorites, favorite];
@@ -66,8 +76,12 @@ const ConverterScreen = () => {
     const size = parseFloat(inputSize);
     if (isNaN(size)) return;
 
-    const result = getAllConversions(size, sizeSystem, gender);
-    setConversions(result);
+    // Get all conversions first
+    const allConversions = getAllConversions(size, fromCountry, gender);
+
+    // Extract the target country conversion
+    const result = allConversions[toCountry];
+    setConvertedSize(result);
 
     // Animate the results
     Animated.sequence([
@@ -151,77 +165,140 @@ const ConverterScreen = () => {
             })}
           </View>
 
-          {/* Size System Selection */}
-          <Text style={[styles.label, { color: theme.colors.text }]}>Size System</Text>
-          <View style={styles.systemContainer}>
-            {['US', 'UK', 'EU', 'JP', 'CM'].map((system) => (
+          {/* From Country Selection */}
+          <Text style={[styles.label, { color: theme.colors.text }]}>From Country</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.countryScroll}
+          >
+            {countries.map((country) => (
               <TouchableOpacity
-                key={system}
+                key={country.code}
                 style={[
-                  styles.systemButton,
+                  styles.countryButton,
                   { backgroundColor: theme.colors.inputBackground },
-                  sizeSystem === system && { backgroundColor: theme.colors.primary },
+                  fromCountry === country.code && { backgroundColor: theme.colors.primary },
                 ]}
-                onPress={() => setSizeSystem(system)}
+                onPress={() => setFromCountry(country.code)}
               >
+                <Text style={styles.countryFlag}>{country.flag}</Text>
                 <Text
                   style={[
-                    styles.systemText,
+                    styles.countryCode,
                     { color: theme.colors.textSecondary },
-                    sizeSystem === system && { color: '#fff' },
+                    fromCountry === country.code && { color: '#fff' },
                   ]}
                 >
-                  {system}
+                  {country.code}
+                </Text>
+                <Text
+                  style={[
+                    styles.countryName,
+                    { color: theme.colors.textSecondary },
+                    fromCountry === country.code && { color: '#fff' },
+                  ]}
+                >
+                  {country.name}
                 </Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
 
           {/* Size Input */}
           <Text style={[styles.label, { color: theme.colors.text }]}>Your Size</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={[styles.input, { backgroundColor: theme.colors.inputBackground, color: theme.colors.text }]}
-              placeholder={`Enter ${sizeSystem} size`}
-              placeholderTextColor={theme.colors.textTertiary}
-              keyboardType="decimal-pad"
-              value={inputSize}
-              onChangeText={setInputSize}
-              onSubmitEditing={handleConvert}
-            />
-            <TouchableOpacity style={styles.convertButton} onPress={handleConvert}>
-              <LinearGradient
-                colors={theme.colors.gradient}
-                style={styles.buttonGradient}
-              >
-                <Ionicons name="swap-horizontal" size={24} color="#fff" />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+          <TextInput
+            style={[styles.input, { backgroundColor: theme.colors.inputBackground, color: theme.colors.text }]}
+            placeholder={`Enter ${fromCountry} size`}
+            placeholderTextColor={theme.colors.textTertiary}
+            keyboardType="decimal-pad"
+            value={inputSize}
+            onChangeText={setInputSize}
+            onSubmitEditing={handleConvert}
+          />
 
-          {/* Conversion Results */}
-          {conversions && (
-            <Animated.View
-              style={[styles.resultsContainer, { backgroundColor: theme.colors.sectionBackground, transform: [{ scale: scaleAnim }] }]}
+          {/* To Country Selection */}
+          <Text style={[styles.label, { color: theme.colors.text }]}>To Country</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.countryScroll}
+          >
+            {countries.map((country) => (
+              <TouchableOpacity
+                key={country.code}
+                style={[
+                  styles.countryButton,
+                  { backgroundColor: theme.colors.inputBackground },
+                  toCountry === country.code && { backgroundColor: theme.colors.primary },
+                ]}
+                onPress={() => setToCountry(country.code)}
+              >
+                <Text style={styles.countryFlag}>{country.flag}</Text>
+                <Text
+                  style={[
+                    styles.countryCode,
+                    { color: theme.colors.textSecondary },
+                    toCountry === country.code && { color: '#fff' },
+                  ]}
+                >
+                  {country.code}
+                </Text>
+                <Text
+                  style={[
+                    styles.countryName,
+                    { color: theme.colors.textSecondary },
+                    toCountry === country.code && { color: '#fff' },
+                  ]}
+                >
+                  {country.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Convert Button */}
+          <TouchableOpacity style={styles.convertButtonLarge} onPress={handleConvert}>
+            <LinearGradient
+              colors={theme.colors.gradient}
+              style={styles.convertButtonGradient}
             >
-              <View style={styles.resultsHeader}>
-                <Text style={[styles.resultsTitle, { color: theme.colors.text }]}>Size Conversions</Text>
+              <Ionicons name="swap-horizontal" size={24} color="#fff" />
+              <Text style={styles.convertButtonText}>Convert</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Conversion Result */}
+          {convertedSize !== null && (
+            <Animated.View
+              style={[styles.resultCard, { backgroundColor: theme.colors.sectionBackground, transform: [{ scale: scaleAnim }] }]}
+            >
+              <View style={styles.resultHeader}>
+                <Text style={[styles.resultLabel, { color: theme.colors.textSecondary }]}>Converted Size</Text>
                 <TouchableOpacity onPress={saveFavorite}>
                   <Ionicons name="heart-outline" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
               </View>
 
-              {Object.entries(conversions).map(([system, size]) => (
-                <View key={system} style={[styles.resultRow, { borderBottomColor: theme.colors.border }]}>
-                  <View style={styles.resultSystem}>
-                    <Ionicons name="flag" size={16} color={theme.colors.primary} />
-                    <Text style={[styles.resultSystemText, { color: theme.colors.textSecondary }]}>{system}</Text>
-                  </View>
-                  <Text style={[styles.resultSize, { color: theme.colors.primary }]}>
-                    {size !== null ? size.toFixed(1) : 'N/A'}
+              <View style={styles.conversionDisplay}>
+                <View style={styles.conversionFrom}>
+                  <Text style={[styles.conversionCountry, { color: theme.colors.textSecondary }]}>
+                    {countries.find(c => c.code === fromCountry)?.flag} {fromCountry}
+                  </Text>
+                  <Text style={[styles.conversionSize, { color: theme.colors.text }]}>{inputSize}</Text>
+                </View>
+
+                <Ionicons name="arrow-forward" size={32} color={theme.colors.primary} />
+
+                <View style={styles.conversionTo}>
+                  <Text style={[styles.conversionCountry, { color: theme.colors.textSecondary }]}>
+                    {countries.find(c => c.code === toCountry)?.flag} {toCountry}
+                  </Text>
+                  <Text style={[styles.conversionSize, { color: theme.colors.primary }]}>
+                    {convertedSize !== null ? convertedSize.toFixed(1) : 'N/A'}
                   </Text>
                 </View>
-              ))}
+              </View>
             </Animated.View>
           )}
 
@@ -468,6 +545,85 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#666',
     lineHeight: 18,
+  },
+  countryScroll: {
+    marginBottom: 10,
+  },
+  countryButton: {
+    padding: 16,
+    borderRadius: 12,
+    marginRight: 12,
+    minWidth: 140,
+    alignItems: 'center',
+  },
+  countryFlag: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  countryCode: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  countryName: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  convertButtonLarge: {
+    marginTop: 24,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  convertButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 18,
+  },
+  convertButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginLeft: 8,
+  },
+  resultCard: {
+    marginTop: 24,
+    borderRadius: 16,
+    padding: 20,
+  },
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  resultLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  conversionDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  conversionFrom: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  conversionTo: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  conversionCountry: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  conversionSize: {
+    fontSize: 42,
+    fontWeight: '700',
   },
 });
 
