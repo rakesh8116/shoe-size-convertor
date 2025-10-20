@@ -125,9 +125,6 @@ const FavoritesScreen = () => {
                     <Text style={[styles.favoriteSystem, { color: theme.colors.text }]}>
                       {favorite.system} {favorite.size}
                     </Text>
-                    {favorite.brand && (
-                      <Text style={[styles.favoriteBrand, { color: theme.colors.textSecondary }]}>• {favorite.brand}</Text>
-                    )}
                   </View>
                   <TouchableOpacity onPress={() => deleteFavorite(favorite.id)}>
                     <Ionicons name="trash-outline" size={22} color="#ef4444" />

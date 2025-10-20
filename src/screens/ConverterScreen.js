@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAllConversions, brandAdjustments, fitRecommendations } from '../data/conversionData';
+import { getAllConversions, fitRecommendations } from '../data/conversionData';
 import { useTheme } from '../context/ThemeContext';
 
 const ConverterScreen = () => {
@@ -21,7 +21,6 @@ const ConverterScreen = () => {
   const [sizeSystem, setSizeSystem] = useState('US');
   const [inputSize, setInputSize] = useState('');
   const [conversions, setConversions] = useState(null);
-  const [selectedBrand, setSelectedBrand] = useState(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [favorites, setFavorites] = useState([]);
   
@@ -44,19 +43,18 @@ const ConverterScreen = () => {
 
   const saveFavorite = async () => {
     if (!inputSize || !conversions) return;
-    
+
     const favorite = {
       id: Date.now().toString(),
       gender,
       system: sizeSystem,
       size: inputSize,
-      brand: selectedBrand,
       conversions,
     };
 
     const newFavorites = [...favorites, favorite];
     setFavorites(newFavorites);
-    
+
     try {
       await AsyncStorage.setItem('favorites', JSON.stringify(newFavorites));
     } catch (error) {
@@ -68,7 +66,7 @@ const ConverterScreen = () => {
     const size = parseFloat(inputSize);
     if (isNaN(size)) return;
 
-    const result = getAllConversions(size, sizeSystem, gender, selectedBrand);
+    const result = getAllConversions(size, sizeSystem, gender);
     setConversions(result);
 
     // Animate the results
@@ -85,8 +83,6 @@ const ConverterScreen = () => {
       }),
     ]).start();
   };
-
-  const brands = Object.keys(brandAdjustments);
 
   return (
     <LinearGradient
@@ -203,54 +199,6 @@ const ConverterScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Brand Selection */}
-          <Text style={[styles.label, { color: theme.colors.text }]}>Brand (Optional)</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.brandScroll}
-          >
-            <TouchableOpacity
-              style={[
-                styles.brandChip,
-                { backgroundColor: theme.colors.inputBackground },
-                !selectedBrand && { backgroundColor: theme.colors.primary },
-              ]}
-              onPress={() => setSelectedBrand(null)}
-            >
-              <Text
-                style={[
-                  styles.brandChipText,
-                  { color: theme.colors.textSecondary },
-                  !selectedBrand && { color: '#fff' },
-                ]}
-              >
-                Generic
-              </Text>
-            </TouchableOpacity>
-            {brands.map((brand) => (
-              <TouchableOpacity
-                key={brand}
-                style={[
-                  styles.brandChip,
-                  { backgroundColor: theme.colors.inputBackground },
-                  selectedBrand === brand && { backgroundColor: theme.colors.primary },
-                ]}
-                onPress={() => setSelectedBrand(brand)}
-              >
-                <Text
-                  style={[
-                    styles.brandChipText,
-                    { color: theme.colors.textSecondary },
-                    selectedBrand === brand && { color: '#fff' },
-                  ]}
-                >
-                  {brand}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
           {/* Conversion Results */}
           {conversions && (
             <Animated.View
@@ -274,19 +222,6 @@ const ConverterScreen = () => {
                   </Text>
                 </View>
               ))}
-
-              {selectedBrand && brandAdjustments[selectedBrand][gender] !== 0 && (
-                <View style={styles.brandNote}>
-                  <Ionicons name="information-circle" size={16} color="#f59e0b" />
-                  <Text style={styles.brandNoteText}>
-                    {selectedBrand} typically runs{' '}
-                    {brandAdjustments[selectedBrand][gender] > 0
-                      ? 'large'
-                      : 'small'}
-                    . Adjusted accordingly.
-                  </Text>
-                </View>
-              )}
             </Animated.View>
           )}
 
