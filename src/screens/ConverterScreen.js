@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -295,43 +296,22 @@ const ConverterScreen = () => {
 
           {/* From Country Selection */}
           <Text style={[styles.label, { color: theme.colors.text }]}>From Country</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.countryScroll}
-          >
-            {countries.map((country) => (
-              <TouchableOpacity
-                key={country.code}
-                style={[
-                  styles.countryButton,
-                  { backgroundColor: theme.colors.inputBackground },
-                  fromCountry === country.code && { backgroundColor: theme.colors.primary },
-                ]}
-                onPress={() => setFromCountry(country.code)}
-              >
-                <Text style={styles.countryFlag}>{country.flag}</Text>
-                <Text
-                  style={[
-                    styles.countryCode,
-                    { color: theme.colors.textSecondary },
-                    fromCountry === country.code && { color: '#fff' },
-                  ]}
-                >
-                  {country.code}
-                </Text>
-                <Text
-                  style={[
-                    styles.countryName,
-                    { color: theme.colors.textSecondary },
-                    fromCountry === country.code && { color: '#fff' },
-                  ]}
-                >
-                  {country.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <View style={[styles.pickerContainer, { backgroundColor: theme.colors.inputBackground }]}>
+            <Picker
+              selectedValue={fromCountry}
+              onValueChange={(itemValue) => setFromCountry(itemValue)}
+              style={[styles.picker, { color: theme.colors.text }]}
+              dropdownIconColor={theme.colors.text}
+            >
+              {countries.map((country) => (
+                <Picker.Item
+                  key={country.code}
+                  label={`${country.flag} ${country.name} (${country.code})`}
+                  value={country.code}
+                />
+              ))}
+            </Picker>
+          </View>
 
           {/* Size Input */}
           <Text style={[styles.label, { color: theme.colors.text }]}>Your Size</Text>
@@ -355,43 +335,22 @@ const ConverterScreen = () => {
 
           {/* To Country Selection */}
           <Text style={[styles.label, { color: theme.colors.text }]}>To Country</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.countryScroll}
-          >
-            {countries.map((country) => (
-              <TouchableOpacity
-                key={country.code}
-                style={[
-                  styles.countryButton,
-                  { backgroundColor: theme.colors.inputBackground },
-                  toCountry === country.code && { backgroundColor: theme.colors.primary },
-                ]}
-                onPress={() => setToCountry(country.code)}
-              >
-                <Text style={styles.countryFlag}>{country.flag}</Text>
-                <Text
-                  style={[
-                    styles.countryCode,
-                    { color: theme.colors.textSecondary },
-                    toCountry === country.code && { color: '#fff' },
-                  ]}
-                >
-                  {country.code}
-                </Text>
-                <Text
-                  style={[
-                    styles.countryName,
-                    { color: theme.colors.textSecondary },
-                    toCountry === country.code && { color: '#fff' },
-                  ]}
-                >
-                  {country.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <View style={[styles.pickerContainer, { backgroundColor: theme.colors.inputBackground }]}>
+            <Picker
+              selectedValue={toCountry}
+              onValueChange={(itemValue) => setToCountry(itemValue)}
+              style={[styles.picker, { color: theme.colors.text }]}
+              dropdownIconColor={theme.colors.text}
+            >
+              {countries.map((country) => (
+                <Picker.Item
+                  key={country.code}
+                  label={`${country.flag} ${country.name} (${country.code})`}
+                  value={country.code}
+                />
+              ))}
+            </Picker>
+          </View>
 
           {/* Convert Button */}
           <TouchableOpacity style={styles.convertButtonLarge} onPress={handleConvert}>
@@ -608,6 +567,15 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     color: '#333',
+  },
+  pickerContainer: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
   },
   convertButton: {
     marginLeft: 12,
