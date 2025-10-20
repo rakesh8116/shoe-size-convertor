@@ -218,6 +218,14 @@ const ConverterScreen = () => {
           <Text style={[styles.title, { color: theme.colors.headerText }]}>FitRight</Text>
           <Text style={[styles.subtitle, { color: theme.colors.headerText }]}>Get your fit right globally</Text>
 
+          {/* Developer Credit */}
+          <View style={styles.developerCredit}>
+            <Ionicons name="code-slash" size={14} color={theme.colors.headerText} style={{ opacity: 0.9 }} />
+            <Text style={[styles.developerText, { color: theme.colors.headerText }]}>
+              Developed by Ruhan Singh
+            </Text>
+          </View>
+
           {/* History Button */}
           <TouchableOpacity
             style={styles.historyButton}
@@ -509,6 +517,22 @@ const styles = StyleSheet.create({
     color: '#fff',
     opacity: 0.9,
     marginTop: 5,
+  },
+  developerCredit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 12,
+  },
+  developerText: {
+    fontSize: 12,
+    color: '#fff',
+    opacity: 0.95,
+    marginLeft: 6,
+    fontWeight: '500',
   },
   card: {
     backgroundColor: '#fff',
