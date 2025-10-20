@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
-import { getAllConversions, fitRecommendations, getKidsAgeRecommendation } from '../data/conversionData';
+import { getAllConversions, fitRecommendations, getKidsAgeRecommendation, getAdultSizeInfo } from '../data/conversionData';
 import { useTheme } from '../context/ThemeContext';
 import OnboardingModal from '../components/OnboardingModal';
 import HistoryModal from '../components/HistoryModal';
@@ -395,17 +395,65 @@ const ConverterScreen = () => {
                 </View>
               </View>
 
-              {/* Age Recommendation for Kids */}
-              {gender === 'kids' && (
-                <View style={styles.ageRecommendation}>
+              {/* Size Information - Kids or Adults */}
+              {gender === 'kids' ? (
+                <View style={styles.sizeInfo}>
                   <Ionicons name="person-outline" size={18} color={theme.colors.primary} />
-                  <View style={styles.ageTextContainer}>
-                    <Text style={[styles.ageLabel, { color: theme.colors.textTertiary }]}>Typical Age:</Text>
-                    <Text style={[styles.ageRange, { color: theme.colors.text }]}>
+                  <View style={styles.sizeInfoContent}>
+                    <Text style={[styles.sizeInfoLabel, { color: theme.colors.textTertiary }]}>Typical Age:</Text>
+                    <Text style={[styles.sizeInfoValue, { color: theme.colors.text }]}>
                       {getKidsAgeRecommendation(parseFloat(inputSize), fromCountry) || 'Size varies by child'}
                     </Text>
                   </View>
                 </View>
+              ) : (
+                (() => {
+                  const sizeInfo = getAdultSizeInfo(parseFloat(inputSize), gender);
+                  if (!sizeInfo || !sizeInfo.category) return null;
+
+                  return (
+                    <View style={styles.sizeInfoContainer}>
+                      {/* Size Category */}
+                      <View style={styles.sizeInfoRow}>
+                        <Ionicons
+                          name={gender === 'women' ? 'woman' : 'man'}
+                          size={16}
+                          color={theme.colors.primary}
+                        />
+                        <Text style={[styles.sizeInfoLabel, { color: theme.colors.textTertiary }]}>
+                          Size Category:
+                        </Text>
+                        <Text style={[styles.sizeInfoValue, { color: theme.colors.text }]}>
+                          {sizeInfo.category}
+                        </Text>
+                      </View>
+
+                      {/* Availability */}
+                      <View style={styles.sizeInfoRow}>
+                        <Ionicons
+                          name="cart-outline"
+                          size={16}
+                          color={theme.colors.primary}
+                        />
+                        <Text style={[styles.sizeInfoText, { color: theme.colors.textSecondary }]}>
+                          {sizeInfo.availability}
+                        </Text>
+                      </View>
+
+                      {/* Width Recommendation */}
+                      <View style={styles.sizeInfoRow}>
+                        <Ionicons
+                          name="resize-outline"
+                          size={16}
+                          color={theme.colors.primary}
+                        />
+                        <Text style={[styles.sizeInfoText, { color: theme.colors.textSecondary }]}>
+                          {sizeInfo.width}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })()
               )}
             </Animated.View>
           )}
@@ -786,7 +834,7 @@ const styles = StyleSheet.create({
     fontSize: 42,
     fontWeight: '700',
   },
-  ageRecommendation: {
+  sizeInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -795,19 +843,35 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(0, 0, 0, 0.1)',
   },
-  ageTextContainer: {
+  sizeInfoContent: {
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: 8,
   },
-  ageLabel: {
-    fontSize: 14,
+  sizeInfoLabel: {
+    fontSize: 13,
     fontWeight: '600',
     marginRight: 6,
   },
-  ageRange: {
-    fontSize: 14,
+  sizeInfoValue: {
+    fontSize: 13,
     fontWeight: '700',
+  },
+  sizeInfoContainer: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.1)',
+    gap: 10,
+  },
+  sizeInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sizeInfoText: {
+    fontSize: 12,
+    flex: 1,
   },
   swapButton: {
     alignItems: 'center',

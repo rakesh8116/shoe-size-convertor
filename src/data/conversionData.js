@@ -190,3 +190,59 @@ export const getKidsAgeRecommendation = (size, system) => {
 
   return kidsAgeGuide[system][closestSize];
 };
+
+// Adult size information (for men and women)
+export const getAdultSizeInfo = (size, gender) => {
+  if (gender === 'kids') return null;
+
+  const usSize = parseFloat(size);
+
+  // Determine size category and availability
+  let category = '';
+  let availability = '';
+  let width = '';
+
+  if (gender === 'women') {
+    if (usSize >= 5 && usSize <= 6.5) {
+      category = 'Small/Petite';
+      availability = 'Less common - may need special order';
+      width = 'Narrow to Standard width (B/M)';
+    } else if (usSize >= 7 && usSize <= 9) {
+      category = 'Average/Standard';
+      availability = 'Most common size - widely available';
+      width = 'Standard width (M) recommended';
+    } else if (usSize >= 9.5 && usSize <= 11) {
+      category = 'Large';
+      availability = 'Popular size - usually in stock';
+      width = 'Standard to Wide width (M/W)';
+    } else if (usSize >= 11.5) {
+      category = 'Extra Large';
+      availability = 'Less common - specialty stores recommended';
+      width = 'Wide width options available';
+    }
+  } else if (gender === 'men') {
+    if (usSize >= 6 && usSize <= 8) {
+      category = 'Small';
+      availability = 'Less common - may need special order';
+      width = 'Narrow to Standard width (D)';
+    } else if (usSize >= 8.5 && usSize <= 10.5) {
+      category = 'Average/Standard';
+      availability = 'Most common size - widely available';
+      width = 'Standard width (D) recommended';
+    } else if (usSize >= 11 && usSize <= 12.5) {
+      category = 'Large';
+      availability = 'Popular size - usually in stock';
+      width = 'Standard to Wide width (D/2E)';
+    } else if (usSize >= 13) {
+      category = 'Extra Large';
+      availability = 'Athletic/specialty size - may need online order';
+      width = 'Wide width options available';
+    }
+  }
+
+  return {
+    category,
+    availability,
+    width
+  };
+};
