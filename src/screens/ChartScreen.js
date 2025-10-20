@@ -10,22 +10,25 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { conversionData, widthGuide } from '../data/conversionData';
+import { useTheme } from '../context/ThemeContext';
 
 const ChartScreen = () => {
+  const { theme } = useTheme();
+
   const renderSizeChart = (gender) => {
     const data = conversionData[gender];
     if (!data) return null;
 
     return (
       <View style={styles.chartSection}>
-        <Text style={styles.chartTitle}>
+        <Text style={[styles.chartTitle, { color: theme.colors.text }]}>
           {gender.charAt(0).toUpperCase() + gender.slice(1)}'s Size Chart
         </Text>
-        
+
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View>
             {/* Header Row */}
-            <View style={styles.tableHeader}>
+            <View style={[styles.tableHeader, { backgroundColor: theme.colors.primary }]}>
               <View style={styles.tableCell}>
                 <Text style={styles.headerText}>US</Text>
               </View>
@@ -42,18 +45,18 @@ const ChartScreen = () => {
 
             {/* Data Rows */}
             {data.US.map((usSize, index) => (
-              <View key={index} style={styles.tableRow}>
+              <View key={index} style={[styles.tableRow, { borderBottomColor: theme.colors.border }]}>
                 <View style={styles.tableCell}>
-                  <Text style={styles.cellText}>{usSize}</Text>
+                  <Text style={[styles.cellText, { color: theme.colors.text }]}>{usSize}</Text>
                 </View>
                 <View style={styles.tableCell}>
-                  <Text style={styles.cellText}>{data.UK[index]}</Text>
+                  <Text style={[styles.cellText, { color: theme.colors.text }]}>{data.UK[index]}</Text>
                 </View>
                 <View style={styles.tableCell}>
-                  <Text style={styles.cellText}>{data.EU[index]}</Text>
+                  <Text style={[styles.cellText, { color: theme.colors.text }]}>{data.EU[index]}</Text>
                 </View>
                 <View style={styles.tableCell}>
-                  <Text style={styles.cellText}>{data.CM[index]}</Text>
+                  <Text style={[styles.cellText, { color: theme.colors.text }]}>{data.CM[index]}</Text>
                 </View>
               </View>
             ))}
@@ -65,16 +68,16 @@ const ChartScreen = () => {
 
   return (
     <LinearGradient
-      colors={['#667eea', '#764ba2']}
+      colors={theme.colors.gradient}
       style={styles.container}
     >
       <View style={styles.header}>
-        <Ionicons name="grid" size={48} color="#fff" />
-        <Text style={styles.title}>Size Charts</Text>
-        <Text style={styles.subtitle}>Complete Reference Guide</Text>
+        <Ionicons name="grid" size={48} color={theme.colors.headerText} />
+        <Text style={[styles.title, { color: theme.colors.headerText }]}>Size Charts</Text>
+        <Text style={[styles.subtitle, { color: theme.colors.headerText }]}>Complete Reference Guide</Text>
       </View>
 
-      <View style={styles.content}>
+      <View style={[styles.content, { backgroundColor: theme.colors.background }]}>
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Size Charts */}
           {renderSizeChart('men')}
@@ -83,21 +86,21 @@ const ChartScreen = () => {
 
           {/* Width Guide */}
           <View style={styles.guideSection}>
-            <Text style={styles.guideTitle}>Width Guide</Text>
-            <Text style={styles.guideDescription}>
+            <Text style={[styles.guideTitle, { color: theme.colors.text }]}>Width Guide</Text>
+            <Text style={[styles.guideDescription, { color: theme.colors.textSecondary }]}>
               Shoe width is as important as length for proper fit
             </Text>
 
             {Object.entries(widthGuide).map(([width, description]) => (
-              <View key={width} style={styles.guideItem}>
-                <View style={styles.guideIconContainer}>
-                  <Ionicons name="resize" size={20} color="#667eea" />
+              <View key={width} style={[styles.guideItem, { backgroundColor: theme.colors.sectionBackground }]}>
+                <View style={[styles.guideIconContainer, { backgroundColor: theme.colors.background }]}>
+                  <Ionicons name="resize" size={20} color={theme.colors.primary} />
                 </View>
                 <View style={styles.guideContent}>
-                  <Text style={styles.guideWidthName}>
+                  <Text style={[styles.guideWidthName, { color: theme.colors.text }]}>
                     {width.charAt(0).toUpperCase() + width.slice(1)}
                   </Text>
-                  <Text style={styles.guideWidthDescription}>{description}</Text>
+                  <Text style={[styles.guideWidthDescription, { color: theme.colors.textSecondary }]}>{description}</Text>
                 </View>
               </View>
             ))}
@@ -105,51 +108,51 @@ const ChartScreen = () => {
 
           {/* How to Measure */}
           <View style={styles.guideSection}>
-            <Text style={styles.guideTitle}>How to Measure Your Feet</Text>
-            
+            <Text style={[styles.guideTitle, { color: theme.colors.text }]}>How to Measure Your Feet</Text>
+
             <View style={styles.stepContainer}>
-              <View style={styles.stepNumber}>
+              <View style={[styles.stepNumber, { backgroundColor: theme.colors.primary }]}>
                 <Text style={styles.stepNumberText}>1</Text>
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Prepare Materials</Text>
-                <Text style={styles.stepDescription}>
+                <Text style={[styles.stepTitle, { color: theme.colors.text }]}>Prepare Materials</Text>
+                <Text style={[styles.stepDescription, { color: theme.colors.textSecondary }]}>
                   Get a piece of paper, a pencil, and a ruler or measuring tape
                 </Text>
               </View>
             </View>
 
             <View style={styles.stepContainer}>
-              <View style={styles.stepNumber}>
+              <View style={[styles.stepNumber, { backgroundColor: theme.colors.primary }]}>
                 <Text style={styles.stepNumberText}>2</Text>
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Trace Your Foot</Text>
-                <Text style={styles.stepDescription}>
+                <Text style={[styles.stepTitle, { color: theme.colors.text }]}>Trace Your Foot</Text>
+                <Text style={[styles.stepDescription, { color: theme.colors.textSecondary }]}>
                   Stand on the paper and trace the outline of your foot while wearing socks
                 </Text>
               </View>
             </View>
 
             <View style={styles.stepContainer}>
-              <View style={styles.stepNumber}>
+              <View style={[styles.stepNumber, { backgroundColor: theme.colors.primary }]}>
                 <Text style={styles.stepNumberText}>3</Text>
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Measure Length</Text>
-                <Text style={styles.stepDescription}>
+                <Text style={[styles.stepTitle, { color: theme.colors.text }]}>Measure Length</Text>
+                <Text style={[styles.stepDescription, { color: theme.colors.textSecondary }]}>
                   Measure from heel to longest toe. This is your foot length in cm
                 </Text>
               </View>
             </View>
 
             <View style={styles.stepContainer}>
-              <View style={styles.stepNumber}>
+              <View style={[styles.stepNumber, { backgroundColor: theme.colors.primary }]}>
                 <Text style={styles.stepNumberText}>4</Text>
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Convert to Size</Text>
-                <Text style={styles.stepDescription}>
+                <Text style={[styles.stepTitle, { color: theme.colors.text }]}>Convert to Size</Text>
+                <Text style={[styles.stepDescription, { color: theme.colors.textSecondary }]}>
                   Use the CM column in the charts above to find your size
                 </Text>
               </View>
@@ -158,8 +161,8 @@ const ChartScreen = () => {
 
           {/* Tips Section */}
           <View style={styles.tipsSection}>
-            <Text style={styles.guideTitle}>Pro Tips</Text>
-            
+            <Text style={[styles.guideTitle, { color: theme.colors.text }]}>Pro Tips</Text>
+
             <View style={styles.tipItem}>
               <Ionicons name="bulb" size={20} color="#f59e0b" />
               <Text style={styles.tipText}>
@@ -190,8 +193,8 @@ const ChartScreen = () => {
           </View>
 
           {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
+          <View style={[styles.footer, { backgroundColor: theme.colors.inputBackground }]}>
+            <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>
               Always try on shoes when possible, as fit can vary by brand and style
             </Text>
           </View>

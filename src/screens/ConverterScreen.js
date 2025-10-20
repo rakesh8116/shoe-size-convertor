@@ -13,8 +13,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllConversions, brandAdjustments, fitRecommendations } from '../data/conversionData';
+import { useTheme } from '../context/ThemeContext';
 
 const ConverterScreen = () => {
+  const { theme } = useTheme();
   const [gender, setGender] = useState('men');
   const [sizeSystem, setSizeSystem] = useState('US');
   const [inputSize, setInputSize] = useState('');
@@ -88,64 +90,89 @@ const ConverterScreen = () => {
 
   return (
     <LinearGradient
-      colors={['#667eea', '#764ba2']}
+      colors={theme.colors.gradient}
       style={styles.container}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Ionicons name="footsteps" size={48} color="#fff" />
-          <Text style={styles.title}>SoleMate</Text>
-          <Text style={styles.subtitle}>Your Perfect Fit, Worldwide</Text>
+          <Ionicons name="footsteps" size={48} color={theme.colors.headerText} />
+          <Text style={[styles.title, { color: theme.colors.headerText }]}>FitRight</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.headerText }]}>Get your fit right globally</Text>
         </View>
 
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.colors.background }]}>
           {/* Gender Selection */}
-          <Text style={styles.label}>Select Gender</Text>
+          <Text style={[styles.label, { color: theme.colors.text }]}>Select Gender</Text>
           <View style={styles.genderContainer}>
-            {['men', 'women', 'kids'].map((g) => (
-              <TouchableOpacity
-                key={g}
-                style={[
-                  styles.genderButton,
-                  gender === g && styles.genderButtonActive,
-                ]}
-                onPress={() => setGender(g)}
-              >
-                <Ionicons
-                  name={
-                    g === 'men' ? 'man' : g === 'women' ? 'woman' : 'happy'
-                  }
-                  size={24}
-                  color={gender === g ? '#fff' : '#667eea'}
-                />
-                <Text
+            {['men', 'women', 'kids'].map((g) => {
+              const getActiveColor = () => {
+                if (g === 'women') return '#ec4899'; // Pink
+                if (g === 'kids') return '#f59e0b'; // Yellow/Orange
+                return theme.colors.primary; // Blue for men
+              };
+
+              const getIconColor = () => {
+                if (gender === g) return '#fff';
+                if (g === 'women') return '#ec4899';
+                if (g === 'kids') return '#f59e0b';
+                return theme.colors.primary;
+              };
+
+              const getTextColor = () => {
+                if (gender === g) return '#fff';
+                if (g === 'women') return '#ec4899';
+                if (g === 'kids') return '#f59e0b';
+                return theme.colors.primary;
+              };
+
+              return (
+                <TouchableOpacity
+                  key={g}
                   style={[
-                    styles.genderText,
-                    gender === g && styles.genderTextActive,
+                    styles.genderButton,
+                    { backgroundColor: theme.colors.inputBackground },
+                    gender === g && { backgroundColor: getActiveColor() },
                   ]}
+                  onPress={() => setGender(g)}
                 >
-                  {g.charAt(0).toUpperCase() + g.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Ionicons
+                    name={
+                      g === 'men' ? 'man' : g === 'women' ? 'woman' : 'happy'
+                    }
+                    size={24}
+                    color={getIconColor()}
+                  />
+                  <Text
+                    style={[
+                      styles.genderText,
+                      { color: getTextColor() },
+                    ]}
+                  >
+                    {g.charAt(0).toUpperCase() + g.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {/* Size System Selection */}
-          <Text style={styles.label}>Size System</Text>
+          <Text style={[styles.label, { color: theme.colors.text }]}>Size System</Text>
           <View style={styles.systemContainer}>
             {['US', 'UK', 'EU', 'JP', 'CM'].map((system) => (
               <TouchableOpacity
                 key={system}
                 style={[
                   styles.systemButton,
-                  sizeSystem === system && styles.systemButtonActive,
+                  { backgroundColor: theme.colors.inputBackground },
+                  sizeSystem === system && { backgroundColor: theme.colors.primary },
                 ]}
                 onPress={() => setSizeSystem(system)}
               >
                 <Text
                   style={[
                     styles.systemText,
-                    sizeSystem === system && styles.systemTextActive,
+                    { color: theme.colors.textSecondary },
+                    sizeSystem === system && { color: '#fff' },
                   ]}
                 >
                   {system}
@@ -155,12 +182,12 @@ const ConverterScreen = () => {
           </View>
 
           {/* Size Input */}
-          <Text style={styles.label}>Your Size</Text>
+          <Text style={[styles.label, { color: theme.colors.text }]}>Your Size</Text>
           <View style={styles.inputContainer}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.colors.inputBackground, color: theme.colors.text }]}
               placeholder={`Enter ${sizeSystem} size`}
-              placeholderTextColor="#999"
+              placeholderTextColor={theme.colors.textTertiary}
               keyboardType="decimal-pad"
               value={inputSize}
               onChangeText={setInputSize}
@@ -168,7 +195,7 @@ const ConverterScreen = () => {
             />
             <TouchableOpacity style={styles.convertButton} onPress={handleConvert}>
               <LinearGradient
-                colors={['#667eea', '#764ba2']}
+                colors={theme.colors.gradient}
                 style={styles.buttonGradient}
               >
                 <Ionicons name="swap-horizontal" size={24} color="#fff" />
@@ -177,7 +204,7 @@ const ConverterScreen = () => {
           </View>
 
           {/* Brand Selection */}
-          <Text style={styles.label}>Brand (Optional)</Text>
+          <Text style={[styles.label, { color: theme.colors.text }]}>Brand (Optional)</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -186,14 +213,16 @@ const ConverterScreen = () => {
             <TouchableOpacity
               style={[
                 styles.brandChip,
-                !selectedBrand && styles.brandChipActive,
+                { backgroundColor: theme.colors.inputBackground },
+                !selectedBrand && { backgroundColor: theme.colors.primary },
               ]}
               onPress={() => setSelectedBrand(null)}
             >
               <Text
                 style={[
                   styles.brandChipText,
-                  !selectedBrand && styles.brandChipTextActive,
+                  { color: theme.colors.textSecondary },
+                  !selectedBrand && { color: '#fff' },
                 ]}
               >
                 Generic
@@ -204,14 +233,16 @@ const ConverterScreen = () => {
                 key={brand}
                 style={[
                   styles.brandChip,
-                  selectedBrand === brand && styles.brandChipActive,
+                  { backgroundColor: theme.colors.inputBackground },
+                  selectedBrand === brand && { backgroundColor: theme.colors.primary },
                 ]}
                 onPress={() => setSelectedBrand(brand)}
               >
                 <Text
                   style={[
                     styles.brandChipText,
-                    selectedBrand === brand && styles.brandChipTextActive,
+                    { color: theme.colors.textSecondary },
+                    selectedBrand === brand && { color: '#fff' },
                   ]}
                 >
                   {brand}
@@ -223,22 +254,22 @@ const ConverterScreen = () => {
           {/* Conversion Results */}
           {conversions && (
             <Animated.View
-              style={[styles.resultsContainer, { transform: [{ scale: scaleAnim }] }]}
+              style={[styles.resultsContainer, { backgroundColor: theme.colors.sectionBackground, transform: [{ scale: scaleAnim }] }]}
             >
               <View style={styles.resultsHeader}>
-                <Text style={styles.resultsTitle}>Size Conversions</Text>
+                <Text style={[styles.resultsTitle, { color: theme.colors.text }]}>Size Conversions</Text>
                 <TouchableOpacity onPress={saveFavorite}>
-                  <Ionicons name="heart-outline" size={24} color="#667eea" />
+                  <Ionicons name="heart-outline" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
               </View>
 
               {Object.entries(conversions).map(([system, size]) => (
-                <View key={system} style={styles.resultRow}>
+                <View key={system} style={[styles.resultRow, { borderBottomColor: theme.colors.border }]}>
                   <View style={styles.resultSystem}>
-                    <Ionicons name="flag" size={16} color="#667eea" />
-                    <Text style={styles.resultSystemText}>{system}</Text>
+                    <Ionicons name="flag" size={16} color={theme.colors.primary} />
+                    <Text style={[styles.resultSystemText, { color: theme.colors.textSecondary }]}>{system}</Text>
                   </View>
-                  <Text style={styles.resultSize}>
+                  <Text style={[styles.resultSize, { color: theme.colors.primary }]}>
                     {size !== null ? size.toFixed(1) : 'N/A'}
                   </Text>
                 </View>
@@ -261,25 +292,25 @@ const ConverterScreen = () => {
 
           {/* Fit Recommendations */}
           <TouchableOpacity
-            style={styles.recommendationToggle}
+            style={[styles.recommendationToggle, { backgroundColor: theme.colors.inputBackground }]}
             onPress={() => setShowRecommendations(!showRecommendations)}
           >
-            <Text style={styles.recommendationToggleText}>
+            <Text style={[styles.recommendationToggleText, { color: theme.colors.primary }]}>
               Shoe Fit Guide
             </Text>
             <Ionicons
               name={showRecommendations ? 'chevron-up' : 'chevron-down'}
               size={20}
-              color="#667eea"
+              color={theme.colors.primary}
             />
           </TouchableOpacity>
 
           {showRecommendations && (
             <View style={styles.recommendationsContainer}>
               {Object.entries(fitRecommendations).map(([type, tip]) => (
-                <View key={type} style={styles.recommendationItem}>
-                  <Text style={styles.recommendationType}>{type}</Text>
-                  <Text style={styles.recommendationTip}>{tip}</Text>
+                <View key={type} style={[styles.recommendationItem, { backgroundColor: theme.colors.sectionBackground }]}>
+                  <Text style={[styles.recommendationType, { color: theme.colors.text }]}>{type}</Text>
+                  <Text style={[styles.recommendationTip, { color: theme.colors.textSecondary }]}>{tip}</Text>
                 </View>
               ))}
             </View>

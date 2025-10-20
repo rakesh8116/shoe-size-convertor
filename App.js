@@ -8,13 +8,16 @@ import ConverterScreen from './src/screens/ConverterScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
 import ChartScreen from './src/screens/ChartScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
-export default function App() {
+function AppNavigator() {
+  const { theme, isDarkMode } = useTheme();
+
   return (
     <NavigationContainer>
-      <StatusBar style="light" />
+      <StatusBar style={isDarkMode ? 'light' : 'light'} />
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
@@ -32,10 +35,10 @@ export default function App() {
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: '#667eea',
-          tabBarInactiveTintColor: '#9ca3af',
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.tabBarInactive,
           tabBarStyle: {
-            backgroundColor: '#fff',
+            backgroundColor: theme.colors.tabBar,
             borderTopWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
@@ -50,29 +53,29 @@ export default function App() {
           headerShown: false,
         })}
       >
-        <Tab.Screen 
-          name="Converter" 
+        <Tab.Screen
+          name="Converter"
           component={ConverterScreen}
           options={{
             tabBarLabel: 'Convert',
           }}
         />
-        <Tab.Screen 
-          name="Favorites" 
+        <Tab.Screen
+          name="Favorites"
           component={FavoritesScreen}
           options={{
             tabBarLabel: 'Saved',
           }}
         />
-        <Tab.Screen 
-          name="Charts" 
+        <Tab.Screen
+          name="Charts"
           component={ChartScreen}
           options={{
             tabBarLabel: 'Charts',
           }}
         />
-        <Tab.Screen 
-          name="Settings" 
+        <Tab.Screen
+          name="Settings"
           component={SettingsScreen}
           options={{
             tabBarLabel: 'Settings',
@@ -80,5 +83,13 @@ export default function App() {
         />
       </Tab.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppNavigator />
+    </ThemeProvider>
   );
 }

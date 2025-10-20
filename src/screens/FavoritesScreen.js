@@ -10,8 +10,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../context/ThemeContext';
 
 const FavoritesScreen = () => {
+  const { theme } = useTheme();
   const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
@@ -79,12 +81,12 @@ const FavoritesScreen = () => {
 
   return (
     <LinearGradient
-      colors={['#667eea', '#764ba2']}
+      colors={theme.colors.gradient}
       style={styles.container}
     >
       <View style={styles.header}>
-        <Ionicons name="heart" size={48} color="#fff" />
-        <Text style={styles.title}>Saved Sizes</Text>
+        <Ionicons name="heart" size={48} color={theme.colors.headerText} />
+        <Text style={[styles.title, { color: theme.colors.headerText }]}>Saved Sizes</Text>
         {favorites.length > 0 && (
           <TouchableOpacity onPress={clearAllFavorites} style={styles.clearButton}>
             <Text style={styles.clearButtonText}>Clear All</Text>
@@ -92,22 +94,22 @@ const FavoritesScreen = () => {
         )}
       </View>
 
-      <View style={styles.content}>
+      <View style={[styles.content, { backgroundColor: theme.colors.background }]}>
         {favorites.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="heart-dislike-outline" size={80} color="#ccc" />
-            <Text style={styles.emptyText}>No saved sizes yet</Text>
-            <Text style={styles.emptySubtext}>
+            <Ionicons name="heart-dislike-outline" size={80} color={theme.colors.textTertiary} />
+            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No saved sizes yet</Text>
+            <Text style={[styles.emptySubtext, { color: theme.colors.textTertiary }]}>
               Save your favorite conversions from the converter tab
             </Text>
           </View>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false}>
             {favorites.map((favorite) => (
-              <View key={favorite.id} style={styles.favoriteCard}>
+              <View key={favorite.id} style={[styles.favoriteCard, { backgroundColor: theme.colors.sectionBackground }]}>
                 <View style={styles.favoriteHeader}>
                   <View style={styles.favoriteInfo}>
-                    <View style={styles.genderBadge}>
+                    <View style={[styles.genderBadge, { backgroundColor: theme.colors.primary }]}>
                       <Ionicons
                         name={
                           favorite.gender === 'men'
@@ -120,11 +122,11 @@ const FavoritesScreen = () => {
                         color="#fff"
                       />
                     </View>
-                    <Text style={styles.favoriteSystem}>
+                    <Text style={[styles.favoriteSystem, { color: theme.colors.text }]}>
                       {favorite.system} {favorite.size}
                     </Text>
                     {favorite.brand && (
-                      <Text style={styles.favoriteBrand}>• {favorite.brand}</Text>
+                      <Text style={[styles.favoriteBrand, { color: theme.colors.textSecondary }]}>• {favorite.brand}</Text>
                     )}
                   </View>
                   <TouchableOpacity onPress={() => deleteFavorite(favorite.id)}>
@@ -134,9 +136,9 @@ const FavoritesScreen = () => {
 
                 <View style={styles.conversionsGrid}>
                   {Object.entries(favorite.conversions).map(([system, size]) => (
-                    <View key={system} style={styles.conversionItem}>
-                      <Text style={styles.conversionSystem}>{system}</Text>
-                      <Text style={styles.conversionSize}>
+                    <View key={system} style={[styles.conversionItem, { backgroundColor: theme.colors.background }]}>
+                      <Text style={[styles.conversionSystem, { color: theme.colors.textSecondary }]}>{system}</Text>
+                      <Text style={[styles.conversionSize, { color: theme.colors.primary }]}>
                         {size !== null ? size.toFixed(1) : 'N/A'}
                       </Text>
                     </View>

@@ -33,6 +33,9 @@
     "extra": {
       "supportEmail": "ruhan.pianist@gmail.com",
       "developerName": "Rakesh Singh"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
