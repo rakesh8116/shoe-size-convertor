@@ -72,6 +72,33 @@ const ConverterScreen = () => {
     }
   };
 
+  const handleSwap = () => {
+    // Swap the countries
+    const tempCountry = fromCountry;
+    setFromCountry(toCountry);
+    setToCountry(tempCountry);
+
+    // If there's a converted size, swap it with input
+    if (convertedSize !== null && inputSize) {
+      setInputSize(convertedSize.toFixed(1));
+      setConvertedSize(parseFloat(inputSize));
+    }
+
+    // Animate the swap
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.9,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
   const handleConvert = () => {
     const size = parseFloat(inputSize);
     if (isNaN(size)) return;
@@ -216,6 +243,14 @@ const ConverterScreen = () => {
             onChangeText={setInputSize}
             onSubmitEditing={handleConvert}
           />
+
+          {/* Swap Button */}
+          <TouchableOpacity style={styles.swapButton} onPress={handleSwap}>
+            <View style={[styles.swapButtonInner, { backgroundColor: theme.colors.inputBackground }]}>
+              <Ionicons name="swap-vertical" size={28} color={theme.colors.primary} />
+              <Text style={[styles.swapButtonText, { color: theme.colors.primary }]}>Swap</Text>
+            </View>
+          </TouchableOpacity>
 
           {/* To Country Selection */}
           <Text style={[styles.label, { color: theme.colors.text }]}>To Country</Text>
@@ -624,6 +659,27 @@ const styles = StyleSheet.create({
   conversionSize: {
     fontSize: 42,
     fontWeight: '700',
+  },
+  swapButton: {
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  swapButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  swapButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });
 
