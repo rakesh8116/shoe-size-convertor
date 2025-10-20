@@ -8,12 +8,16 @@ import {
   TextInput,
   Animated,
   Platform,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 import { getAllConversions, fitRecommendations } from '../data/conversionData';
 import { useTheme } from '../context/ThemeContext';
+import OnboardingModal from '../components/OnboardingModal';
+import HistoryModal from '../components/HistoryModal';
 
 const ConverterScreen = () => {
   const { theme } = useTheme();
@@ -24,6 +28,10 @@ const ConverterScreen = () => {
   const [convertedSize, setConvertedSize] = useState(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [favorites, setFavorites] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
 
   const countries = [
     { code: 'US', name: 'United States', flag: '🇺🇸' },
@@ -36,8 +44,30 @@ const ConverterScreen = () => {
   const scaleAnim = new Animated.Value(1);
 
   useEffect(() => {
+    checkFirstTime();
     loadFavorites();
+    loadHistory();
   }, []);
+
+  const checkFirstTime = async () => {
+    try {
+      const hasSeenOnboarding = await AsyncStorage.getItem('hasSeenOnboarding');
+      if (!hasSeenOnboarding) {
+        setShowOnboarding(true);
+      }
+    } catch (error) {
+      console.log('Error checking onboarding:', error);
+    }
+  };
+
+  const completeOnboarding = async () => {
+    try {
+      await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+      setShowOnboarding(false);
+    } catch (error) {
+      console.log('Error saving onboarding:', error);
+    }
+  };
 
   const loadFavorites = async () => {
     try {
@@ -50,8 +80,22 @@ const ConverterScreen = () => {
     }
   };
 
+  const loadHistory = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('conversionHistory');
+      if (stored) {
+        setHistory(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.log('Error loading history:', error);
+    }
+  };
+
   const saveFavorite = async () => {
     if (!inputSize || !convertedSize) return;
+
+    // Haptic feedback
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     const favorite = {
       id: Date.now().toString(),
@@ -72,7 +116,30 @@ const ConverterScreen = () => {
     }
   };
 
+  const saveToHistory = async (conversion) => {
+    try {
+      const newHistory = [conversion, ...history].slice(0, 10); // Keep last 10
+      setHistory(newHistory);
+      await AsyncStorage.setItem('conversionHistory', JSON.stringify(newHistory));
+    } catch (error) {
+      console.log('Error saving history:', error);
+    }
+  };
+
+  const loadFromHistory = (item) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setGender(item.gender);
+    setFromCountry(item.fromCountry);
+    setToCountry(item.toCountry);
+    setInputSize(item.inputSize);
+    setConvertedSize(item.convertedSize);
+    setShowHistory(false);
+  };
+
   const handleSwap = () => {
+    // Haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     // Swap the countries
     const tempCountry = fromCountry;
     setFromCountry(toCountry);
@@ -103,12 +170,27 @@ const ConverterScreen = () => {
     const size = parseFloat(inputSize);
     if (isNaN(size)) return;
 
+    // Haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     // Get all conversions first
     const allConversions = getAllConversions(size, fromCountry, gender);
 
     // Extract the target country conversion
     const result = allConversions[toCountry];
     setConvertedSize(result);
+
+    // Save to history
+    const historyItem = {
+      id: Date.now().toString(),
+      gender,
+      fromCountry,
+      toCountry,
+      inputSize: size.toString(),
+      convertedSize: result,
+      timestamp: new Date().toISOString(),
+    };
+    saveToHistory(historyItem);
 
     // Animate the results
     Animated.sequence([
@@ -135,6 +217,17 @@ const ConverterScreen = () => {
           <Ionicons name="footsteps" size={48} color={theme.colors.headerText} />
           <Text style={[styles.title, { color: theme.colors.headerText }]}>FitRight</Text>
           <Text style={[styles.subtitle, { color: theme.colors.headerText }]}>Get your fit right globally</Text>
+
+          {/* History Button */}
+          <TouchableOpacity
+            style={styles.historyButton}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowHistory(true);
+            }}
+          >
+            <Ionicons name="time-outline" size={28} color={theme.colors.headerText} />
+          </TouchableOpacity>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.colors.background }]}>
@@ -364,6 +457,25 @@ const ConverterScreen = () => {
           )}
         </View>
       </ScrollView>
+
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        visible={showOnboarding}
+        step={onboardingStep}
+        onNext={() => setOnboardingStep(onboardingStep + 1)}
+        onSkip={completeOnboarding}
+        onComplete={completeOnboarding}
+        theme={theme}
+      />
+
+      {/* History Modal */}
+      <HistoryModal
+        visible={showHistory}
+        history={history}
+        onClose={() => setShowHistory(false)}
+        onSelectItem={loadFromHistory}
+        theme={theme}
+      />
     </LinearGradient>
   );
 };
@@ -376,6 +488,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 20,
+    position: 'relative',
+  },
+  historyButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 60 : 40,
+    right: 20,
+    padding: 8,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   title: {
     fontSize: 36,
